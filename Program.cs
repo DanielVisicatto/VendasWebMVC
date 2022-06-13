@@ -1,12 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using VendasWebMvc.Data;
+using VendasWebMvc.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<VendasWebMvcContext>(options =>
-    options.UseMySql("server=localhost;initial catalog=_VENDAS_WEB_MVC;uid=Daniel;pwd=ironmaidenF6%", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.29-mysql")));
+    options.UseMySql("server=localhost;initial catalog=_VENDAS_WEB_MVC;uid=Daniel;pwd=ironmaidenF6%", ServerVersion.Parse("8.0.29-mysql")));
 
 // Add services to the container.
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<SeedingService>();
+builder.Services.AddScoped<SellerService>();
+
+static void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, SeedingService seed)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+        seed.Seed();
+    }
+    else
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
+}
+
 
 var app = builder.Build();
 
